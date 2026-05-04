@@ -219,8 +219,8 @@ export default function App() {
             Android Installation & Permission Fix
           </h5>
           <p className="text-[9px] text-gray-400 mt-2 leading-relaxed">
-            <span className="text-yellow-500 font-bold">১. ইন্সটল সমস্যা:</span> প্লে প্রটেকশন সরাসরি ব্লক করলে Play Store অ্যাপে গিয়ে প্রোফাইল &gt; Play Protect &gt; সেটিংস (⚙️) থেকে <span className="text-red-400 font-bold">'Scan apps with Play Protect'</span> সাময়িকভাবে বন্ধ করুন। এরপর ইন্সটল হবে। <br/>
-            <span className="text-yellow-500 font-bold">২. পারমিশন সমস্যা:</span> যদি 'Action Denied' দেখায়, তবে ফোনের Settings &gt; Apps &gt; <span className="text-white">Vault Tracker</span> &gt; টপ রাইট কর্নারে (⋮) ক্লিক করে <span className="text-accent font-bold">'Allow restricted settings'</span> চালু করুন। এরপর পারমিশন দিন।
+            <span className="text-yellow-500 font-bold">১. ইন্সটল সমস্যা (Play Protect Block):</span> প্লে প্রটেকশন সরাসরি ব্লক করলে Play Store অ্যাপে গিয়ে প্রোফাইল &gt; Play Protect &gt; সেটিংস (⚙️) থেকে <span className="text-red-400 font-bold">'Scan apps with Play Protect'</span> বন্ধ করুন। এরপর অ্যাপটি ইন্সটল হবে। <br/>
+            <span className="text-yellow-500 font-bold">২. পারমিশন সমস্যা:</span> যদি 'Action Denied' দেখায়, তবে ফোনের Settings &gt; Apps &gt; <span className="text-white">Message Guard</span> &gt; টপ রাইট কর্নারে (⋮) ক্লিক করে <span className="text-accent font-bold">'Allow restricted settings'</span> চালু করুন। এরপর পারমিশন দিন।
           </p>
         </div>
 
