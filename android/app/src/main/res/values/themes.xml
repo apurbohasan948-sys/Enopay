@@ -2,8 +2,9 @@
     <!-- Base application theme. -->
     <style name="Theme.SmsOrganizer" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
-        <item name="colorPrimary">#E2136E</item>
-        <item name="colorSecondary">#0F1115</item>
-        <item name="android:statusBarColor">#0F1115</item>
+        <item name="colorPrimary">#F472B6</item>
+        <item name="colorSecondary">#000000</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
     </style>
 </resources>
