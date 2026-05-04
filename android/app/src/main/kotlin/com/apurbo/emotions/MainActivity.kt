@@ -10,7 +10,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import com.apurbo.emotions.ui.theme.SmsOrganizerTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -68,7 +68,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SmsApp(smsViewModel: SmsViewModel = viewModel()) {
+fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("bKash", "Nagad", "Others")
     
@@ -92,7 +92,7 @@ fun SmsApp(smsViewModel: SmsViewModel = viewModel()) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(filteredMessages) { msg ->
                 SmsItem(msg)
-                Divider()
+                HorizontalDivider()
             }
         }
     }

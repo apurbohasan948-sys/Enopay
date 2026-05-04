@@ -17,7 +17,6 @@ import {
 import { 
   Smartphone, 
   CreditCard, 
-  Smartphone as NagadIcon, 
   MessageSquare,
   Search,
   Filter
@@ -50,6 +49,7 @@ interface SmsMessage {
 }
 
 export default function App() {
+  console.log("App component starting...");
   const [user, setUser] = useState<User | null>(null);
   const [messages, setMessages] = useState<SmsMessage[]>([]);
   const [activeTab, setActiveTab] = useState<Category>('bKash');
@@ -131,7 +131,7 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-dark-bg text-gray-200 font-sans flex flex-col items-center py-8">
+    <div className="min-h-screen flex flex-col items-center py-8" style={{ backgroundColor: '#0f1115', color: '#e5e7eb' }}>
       {/* App Container Like Structure */}
       <div className="w-full max-w-md bg-dark-surface rounded-[32px] border-8 border-dark-border shadow-2xl flex flex-col overflow-hidden min-h-[800px]">
         {/* Header */}
@@ -144,7 +144,7 @@ export default function App() {
             </div>
           </div>
           <div className="text-[10px] font-mono text-gray-500 bg-dark-card border border-dark-border px-2 py-1 rounded-lg">
-            {user?.uid.slice(0, 8)}
+            {user?.uid?.slice(0, 8) || 'Init...'}
           </div>
         </header>
         {/* Search Bar */}
