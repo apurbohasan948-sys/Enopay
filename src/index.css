@@ -4,10 +4,10 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   
-  --color-dark-bg: #09090b;
-  --color-dark-surface: #121217;
-  --color-dark-card: #18181f;
-  --color-dark-border: rgba(255, 255, 255, 0.08);
+  --color-dark-bg: #000000;
+  --color-dark-surface: #0a0a0a;
+  --color-dark-card: #111111;
+  --color-dark-border: rgba(255, 255, 255, 0.06);
   
   --color-bkash: #d11266;
   --color-nagad: #e66b1a;
@@ -16,25 +16,39 @@
 
 @layer base {
   body {
-    @apply bg-dark-bg text-gray-200 antialiased;
+    @apply bg-dark-bg text-gray-100 antialiased selection:bg-accent/30;
   }
 }
 
-.glass-surface {
-  background: rgba(18, 18, 23, 0.7);
-  backdrop-filter: blur(12px);
+.premium-card {
+  background: linear-gradient(165deg, #111111 0%, #080808 100%);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.premium-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.glass-nav {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.card-gradient {
-  background: linear-gradient(145deg, rgba(24, 24, 31, 1) 0%, rgba(18, 18, 23, 1) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+.glow-bkash {
+  box-shadow: 0 0 40px -10px rgba(209, 18, 102, 0.2);
 }
 
-.card-glow-bkash {
-  box-shadow: 0 4px 20px -4px rgba(209, 18, 102, 0.15);
+.glow-nagad {
+  box-shadow: 0 0 40px -10px rgba(230, 107, 26, 0.2);
 }
 
-.card-glow-nagad {
-  box-shadow: 0 4px 20px -4px rgba(230, 107, 26, 0.15);
+.tab-active-glow {
+  box-shadow: 0 0 15px rgba(244, 114, 182, 0.4);
 }
