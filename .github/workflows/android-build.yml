@@ -21,9 +21,7 @@ jobs:
     - name: Generate Gradle Wrapper
       run: |
         cd android
-        if [ ! -f "gradlew" ]; then
-          gradle wrapper --gradle-version 8.5
-        fi
+        gradle wrapper --gradle-version 8.7
         chmod +x gradlew
 
     - name: Create placeholder google-services.json
