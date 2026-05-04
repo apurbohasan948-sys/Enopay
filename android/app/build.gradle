@@ -10,7 +10,7 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.apurbo.msg.secure"
+        applicationId "com.apurbo.emotions"
         minSdk 24
         targetSdk 34
         versionCode 5
