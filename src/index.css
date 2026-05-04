@@ -4,12 +4,37 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   
-  --color-dark-bg: #0f1115;
-  --color-dark-surface: #16181d;
-  --color-dark-card: #1c1e26;
-  --color-dark-border: #2d3139;
+  --color-dark-bg: #09090b;
+  --color-dark-surface: #121217;
+  --color-dark-card: #18181f;
+  --color-dark-border: rgba(255, 255, 255, 0.08);
   
-  --color-bkash: #e2136e;
-  --color-nagad: #f27d26;
-  --color-accent: #ec4899;
+  --color-bkash: #d11266;
+  --color-nagad: #e66b1a;
+  --color-accent: #f472b6;
+}
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-gray-200 antialiased;
+  }
+}
+
+.glass-surface {
+  background: rgba(18, 18, 23, 0.7);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.card-gradient {
+  background: linear-gradient(145deg, rgba(24, 24, 31, 1) 0%, rgba(18, 18, 23, 1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.card-glow-bkash {
+  box-shadow: 0 4px 20px -4px rgba(209, 18, 102, 0.15);
+}
+
+.card-glow-nagad {
+  box-shadow: 0 4px 20px -4px rgba(230, 107, 26, 0.15);
 }

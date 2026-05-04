@@ -25,10 +25,29 @@ import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
+    private var onPermissionResult: ((Boolean) -> Unit)? = null
+
+    fun requestSmsPermissions(callback: (Boolean) -> Unit) {
+        onPermissionResult = callback
+        requestPermissionLauncher.launch(
+            arrayOf(
+                Manifest.permission.RECEIVE_SMS,
+                Manifest.permission.READ_SMS
+            )
+        )
+    }
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        // Handle permissions results
+        val allGranted = permissions.entries.all { it.value }
+        onPermissionResult?.invoke(allGranted)
+        if (allGranted) {
+            // Permissions granted, sync messages
+            lifecycleScope.launch(Dispatchers.IO) {
+                SmsRepository(this@MainActivity).syncPendingMessages()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,11 +55,6 @@ class MainActivity : ComponentActivity() {
         
         checkPermissions()
         
-        // Sync pending messages on start
-        lifecycleScope.launch(Dispatchers.IO) {
-            SmsRepository(this@MainActivity).syncPendingMessages()
-        }
-
         setContent {
             SmsOrganizerTheme {
                 Surface(
@@ -87,6 +101,38 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
         
         val filteredMessages = messages.filter { 
             it.category.equals(tabs[selectedTab], ignoreCase = true) 
+        }
+
+        // Permission status check
+        val context = androidx.compose.ui.platform.LocalContext.current
+        var hasSmsPermissions by remember {
+            mutableStateOf(
+                androidx.core.content.ContextCompat.checkSelfPermission(
+                    context, android.Manifest.permission.RECEIVE_SMS
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            )
+        }
+
+        if (!hasSmsPermissions) {
+            Card(
+                modifier = Modifier.padding(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("SMS Permissions Required", style = MaterialTheme.typography.titleSmall)
+                    Text("The app needs SMS permissions to organice your transaction messages.", style = MaterialTheme.typography.bodySmall)
+                    Button(
+                        onClick = { 
+                            (context as? MainActivity)?.requestSmsPermissions { granted ->
+                                hasSmsPermissions = granted
+                            }
+                        },
+                        modifier = Modifier.padding(top = 8.dp)
+                    ) {
+                        Text("Grant Permissions")
+                    }
+                }
+            }
         }
         
         LazyColumn(modifier = Modifier.fillMaxSize()) {

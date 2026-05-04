@@ -121,31 +121,57 @@ export default function App() {
 
   if (criticalError) {
     return (
-      <div className="min-h-screen bg-dark-bg flex items-center justify-center p-8 text-center">
+      <div className="min-h-screen bg-[#0f1115] flex items-center justify-center p-8 text-center">
         <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl max-w-sm">
           <h2 className="text-red-500 font-bold mb-2">Technical Error</h2>
           <p className="text-gray-400 text-sm">{criticalError}</p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-red-500 text-white rounded-lg text-xs font-bold"
+          >
+            Retry Connection
+          </button>
         </div>
       </div>
     );
   }
 
+  // Fallback for long loading
+  const [showFallback, setShowFallback] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) setShowFallback(true);
+    }, 5000);
+    return () => clearTimeout(timer);
+  }, [loading]);
+
   return (
-    <div className="fixed inset-0 flex flex-col bg-dark-bg text-gray-200 font-sans overflow-hidden">
+    <div className="min-h-screen w-full bg-[#09090b] text-gray-200 font-sans flex flex-col overflow-hidden relative">
+      {/* Rendering Check */}
+      <div className="absolute top-0 left-0 w-full h-[2px] bg-accent/20 z-[1001]" title="Render Status Bar" />
+      
       {/* Header */}
-      <header className="p-5 pb-4 flex items-center justify-between border-b border-dark-border bg-dark-surface/50 backdrop-blur-md z-10">
-        <div>
-          <h1 className="font-bold text-xl text-white tracking-tight">TX Organiser</h1>
-          <div className="flex items-center gap-1.5 mt-1">
-            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Live Sync</span>
+      <header className="p-5 pb-4 flex items-center justify-between glass-surface sticky top-0 z-50">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-accent to-pink-600 flex items-center justify-center shadow-lg shadow-accent/20">
+            <Smartphone className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="font-extrabold text-xl text-white tracking-tight leading-none">TX Organiser</h1>
+            <div className="flex items-center gap-1.5 mt-1.5">
+              <div className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </div>
+              <span className="text-[10px] text-emerald-500 font-black uppercase tracking-widest">Safe & Secured</span>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <div className="text-[9px] font-mono text-gray-500 bg-dark-card border border-dark-border px-2 py-0.5 rounded-md">
-            {user?.uid?.slice(0, 8) || 'Init...'}
+        <div className="flex flex-col items-end gap-1.5">
+          <div className="text-[9px] font-bold text-gray-500 bg-white/5 border border-white/10 px-2.5 py-1 rounded-full backdrop-blur-sm">
+            ID: {user?.uid?.slice(0, 8) || 'Init...'}
           </div>
-          {authError && <span className="text-[9px] text-red-500 font-bold uppercase">Config Error</span>}
+          {authError && <span className="text-[9px] text-red-500 font-black uppercase tracking-tighter decoration-double underline">Sync Error</span>}
         </div>
       </header>
 
@@ -171,9 +197,9 @@ export default function App() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-4 text-sm font-bold transition-all relative ${
+              className={`flex-1 py-4 text-xs font-black transition-all relative uppercase tracking-widest ${
                 activeTab === tab 
-                  ? 'text-accent' 
+                  ? 'text-white' 
                   : 'text-gray-500 hover:text-gray-400'
               }`}
             >
@@ -181,7 +207,7 @@ export default function App() {
               {activeTab === tab && (
                 <motion.div 
                   layoutId="activeTab"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
+                  className="absolute bottom-0 left-0 right-0 h-[3px] bg-accent shadow-[0_-2px_10px_rgba(236,72,153,0.5)]"
                 />
               )}
             </button>
@@ -204,6 +230,11 @@ export default function App() {
             <div className="flex-1 flex flex-col items-center justify-center py-20 animate-in fade-in duration-500">
               <div className="w-8 h-8 border-3 border-accent/10 border-t-accent rounded-full animate-spin mb-4" />
               <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] animate-pulse">Syncing Database</p>
+              {showFallback && (
+                <p className="mt-4 text-[10px] text-red-400 font-medium max-w-[200px] text-center">
+                  Taking longer than usual. Please check if you have allowed "Anonymous Auth" in Firebase Console.
+                </p>
+              )}
             </div>
           ) : filteredMessages.length === 0 ? (
             <motion.div 
@@ -235,41 +266,48 @@ export default function App() {
                 <motion.div
                   key={msg.id}
                   layout
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
-                  className="bg-dark-card p-5 rounded-2xl border border-dark-border shadow-sm active:scale-[0.98] transition-transform"
+                  className={`card-gradient p-5 rounded-[24px] shadow-xl group active:scale-[0.98] transition-all duration-300 ${
+                    msg.category === 'bKash' ? 'card-glow-bkash' : 
+                    msg.category === 'Nagad' ? 'card-glow-nagad' : ''
+                  }`}
                 >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shadow-lg ${
+                  <div className="flex justify-between items-center mb-5">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-lg font-black text-white shadow-2xl ${
                         msg.category === 'bKash' ? 'bg-bkash' : 
                         msg.category === 'Nagad' ? 'bg-nagad' : 
-                        'bg-gray-700'
+                        'bg-gray-800'
                       }`}>
                         {msg.category.charAt(0)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-white text-base leading-tight">{msg.sender}</h4>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+                        <h4 className="font-black text-white text-lg tracking-tight leading-tight">{msg.sender}</h4>
+                        <div className="flex items-center gap-2 mt-1">
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest bg-white/5 px-2 py-0.5 rounded-md">
                             {new Date(msg.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                           </span>
-                          <span className="w-1 h-1 bg-gray-700 rounded-full" />
-                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+                          <span className="text-[10px] font-bold text-accent uppercase tracking-widest bg-accent/5 px-2 py-0.5 rounded-md">
                             {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
-                  <p className="text-[14px] text-gray-400 leading-relaxed mb-4">
-                    {msg.body}
-                  </p>
+                  <div className="bg-white/[0.02] border border-white/[0.05] p-4 rounded-2xl mb-4">
+                    <p className="text-[15px] text-gray-300 leading-relaxed font-medium">
+                      {msg.body}
+                    </p>
+                  </div>
                   {msg.trxId && (
-                    <div className="bg-dark-surface border border-dark-border rounded-xl p-3 flex justify-between items-center group/trx">
-                      <span className="text-[9px] font-black text-accent uppercase tracking-widest opacity-80">Ref ID</span>
-                      <span className="text-xs font-mono text-gray-300 font-bold group-hover/trx:text-white transition-colors">{msg.trxId}</span>
+                    <div className="bg-black/20 border border-white/5 rounded-2xl p-4 flex justify-between items-center group/trx ring-1 ring-white/10">
+                      <div className="flex items-center gap-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-accent" />
+                        <span className="text-[10px] font-black text-accent uppercase tracking-[0.2em] opacity-80">Reference ID</span>
+                      </div>
+                      <span className="text-sm font-mono text-gray-200 font-black group-hover/trx:text-white transition-colors">{msg.trxId}</span>
                     </div>
                   )}
                 </motion.div>
