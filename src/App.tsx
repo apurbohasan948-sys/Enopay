@@ -25,10 +25,18 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 import firebaseConfig from '../firebase-applet-config.json';
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+// Initialize Firebase safely
+let app;
+let db: any;
+let auth: any;
+
+try {
+  app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  auth = getAuth(app);
+} catch (error) {
+  console.error("Firebase initialization failed:", error);
+}
 
 type Category = 'bKash' | 'Nagad' | 'Others';
 
@@ -48,8 +56,15 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
+  const [criticalError, setCriticalError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!auth) {
+      setCriticalError("Firebase Auth failed to initialize. Check your configuration.");
+      setLoading(false);
+      return;
+    }
+
     const unsubscribeAuth = onAuthStateChanged(auth, (u) => {
       if (u) {
         setUser(u);
@@ -58,10 +73,11 @@ export default function App() {
         signInAnonymously(auth).catch((err) => {
           console.error("Auth error:", err);
           if (err.code === 'auth/admin-restricted-operation') {
-            setAuthError("Anonymous Authentication is disabled in your Firebase Console. Please enable it under Authentication > Sign-in method.");
+            setAuthError("Anonymous Authentication is disabled in your Firebase Console.");
           } else {
             setAuthError(err.message);
           }
+          setLoading(false); // Stop loading if auth fails
         });
       }
     });
@@ -70,7 +86,7 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || !db) return;
 
     setLoading(true);
     const msgsRef = collection(db, 'users', user.uid, 'messages');
@@ -85,6 +101,7 @@ export default function App() {
       setLoading(false);
     }, (error) => {
       console.error("Firestore error:", error);
+      setAuthError("Failed to connect to data store: " + error.message);
       setLoading(false);
     });
 
@@ -101,6 +118,17 @@ export default function App() {
     
     return matchesCategory && matchesSearch;
   });
+
+  if (criticalError) {
+    return (
+      <div className="min-h-screen bg-dark-bg flex items-center justify-center p-8 text-center">
+        <div className="bg-red-500/10 border border-red-500/20 p-6 rounded-2xl max-w-sm">
+          <h2 className="text-red-500 font-bold mb-2">Technical Error</h2>
+          <p className="text-gray-400 text-sm">{criticalError}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-bg text-gray-200 font-sans flex flex-col items-center py-8">
