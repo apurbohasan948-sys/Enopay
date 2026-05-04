@@ -32,6 +32,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.foundation.background
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.border
+import androidx.compose.foundation.BorderStroke
 
 class MainActivity : ComponentActivity() {
 
@@ -182,7 +183,7 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
                 modifier = Modifier.padding(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF111111)),
                 shape = RoundedCornerShape(24.dp),
-                border = border(1.dp, Color(0xFFF472B6).copy(alpha = 0.2f), RoundedCornerShape(24.dp))
+                border = BorderStroke(1.dp, Color(0xFFF472B6).copy(alpha = 0.2f))
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
@@ -221,7 +222,8 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
                                 (context as? MainActivity)?.openAppInfo()
                             },
                             modifier = Modifier.weight(1f),
-                            border = border(1.dp, Color(0xFFF472B6).copy(alpha = 0.5f), RoundedCornerShape(50.dp))
+                            border = BorderStroke(1.dp, Color(0xFFF472B6).copy(alpha = 0.5f)),
+                            shape = RoundedCornerShape(50.dp)
                         ) {
                             Text("Open Settings", color = Color.White)
                         }
@@ -266,7 +268,7 @@ fun SmsItem(sms: SmsMessage) {
     Card(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF0A0A0A)),
-        border = border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(20.dp))
+        border = BorderStroke(1.dp, Color.White.copy(alpha = 0.05f))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
@@ -296,7 +298,7 @@ fun SmsItem(sms: SmsMessage) {
                     color = Color.White.copy(alpha = 0.05f),
                     shape = RoundedCornerShape(12.dp)
                 ) {
-                    Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterHorizontally) {
+                    Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
                         Box(modifier = Modifier.size(6.dp).background(Color(0xFFF472B6), RoundedCornerShape(50.dp)))
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
