@@ -216,11 +216,11 @@ export default function App() {
         <div className="mx-4 mt-2 mb-4 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-[20px]">
           <h5 className="text-[10px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
-            Android Setup Notice
+            Android Installation & Permission Fix
           </h5>
-          <p className="text-[9px] text-gray-500 mt-2 leading-relaxed">
-            If blocked during install: Tap <span className="text-gray-300 font-bold">More details → Install anyway</span>. <br/>
-            If permissions are denied: Go to <span className="text-gray-300 font-bold">App Info → (⋮) → Allow restricted settings</span>.
+          <p className="text-[9px] text-gray-400 mt-2 leading-relaxed">
+            <span className="text-yellow-500 font-bold">১. ইন্সটল সমস্যা:</span> প্লে প্রটেকশন সরাসরি ব্লক করলে Play Store অ্যাপে গিয়ে প্রোফাইল &gt; Play Protect &gt; সেটিংস (⚙️) থেকে <span className="text-red-400 font-bold">'Scan apps with Play Protect'</span> সাময়িকভাবে বন্ধ করুন। এরপর ইন্সটল হবে। <br/>
+            <span className="text-yellow-500 font-bold">২. পারমিশন সমস্যা:</span> যদি 'Action Denied' দেখায়, তবে ফোনের Settings &gt; Apps &gt; <span className="text-white">Vault Tracker</span> &gt; টপ রাইট কর্নারে (⋮) ক্লিক করে <span className="text-accent font-bold">'Allow restricted settings'</span> চালু করুন। এরপর পারমিশন দিন।
           </p>
         </div>
 
