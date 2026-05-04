@@ -186,20 +186,22 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
             ) {
                 Column(modifier = Modifier.padding(20.dp)) {
                     Text(
-                        "Permission Required", 
+                        "Permission restricted?", 
                         style = MaterialTheme.typography.titleMedium, 
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Please follow these critical steps for Android 13+ devices:", 
+                        "Android ১৩+ ফোনে এই সমস্যাটি হয়। এটি ঠিক করতে নিচের ধাপগুলো অনুসরণ করুন:", 
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color.Gray
+                        color = Color(0xFFF472B6)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    Text("• Tap 'Retry' to request permission.", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
-                    Text("• If 'Restricted/Denied' shows: Tap 'Open Settings' -> Click (⋮) in top right -> 'Allow restricted settings'.", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                    Text("১. নিচের 'Open Settings' বাটনে ক্লিক করুন।", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                    Text("২. ওপরের ডান কোণায় (⋮) তিন-ডট আইকনে ক্লিক করুন।", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                    Text("৩. 'Allow restricted settings' অপশনটি চালু করুন।", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
+                    Text("৪. এরপর অ্যাপে ফিরে এসে পারমিশন দিন।", color = Color.LightGray, style = MaterialTheme.typography.labelSmall)
                     
                     Row(modifier = Modifier.padding(top = 20.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(
@@ -211,7 +213,7 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
                             modifier = Modifier.weight(1f),
                             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF472B6))
                         ) {
-                            Text("Retry", fontWeight = FontWeight.Bold)
+                            Text("Retry Grant", fontWeight = FontWeight.Bold)
                         }
                         
                         OutlinedButton(
@@ -219,9 +221,9 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
                                 (context as? MainActivity)?.openAppInfo()
                             },
                             modifier = Modifier.weight(1f),
-                            border = border(1.dp, Color.Gray, RoundedCornerShape(50.dp))
+                            border = border(1.dp, Color(0xFFF472B6).copy(alpha = 0.5f), RoundedCornerShape(50.dp))
                         ) {
-                            Text("Settings", color = Color.White)
+                            Text("Open Settings", color = Color.White)
                         }
                     }
                 }
