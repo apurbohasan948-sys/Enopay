@@ -119,17 +119,27 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("SMS Permissions Required", style = MaterialTheme.typography.titleSmall)
-                    Text("The app needs SMS permissions to organice your transaction messages.", style = MaterialTheme.typography.bodySmall)
-                    Button(
-                        onClick = { 
-                            (context as? MainActivity)?.requestSmsPermissions { granted ->
-                                hasSmsPermissions = granted
-                            }
-                        },
-                        modifier = Modifier.padding(top = 8.dp)
-                    ) {
-                        Text("Grant Permissions")
+                    Text("Permissions & Security Setup", style = MaterialTheme.typography.titleSmall)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text("To use this app, please follow these steps:", style = MaterialTheme.typography.bodySmall)
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text("• If Play Protect blocks: Tap 'More details' then 'Install anyway'.", style = MaterialTheme.typography.labelSmall)
+                    Text("• If 'Action Denied': Go to App Info -> Tap (⋮) in top right -> 'Allow restricted settings'.", style = MaterialTheme.typography.labelSmall)
+                    
+                    Row(modifier = Modifier.padding(top = 16.dp).fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = { 
+                                (context as? MainActivity)?.requestSmsPermissions { granted ->
+                                    hasSmsPermissions = granted
+                                    if (!granted) {
+                                        // Still not granted, likely restricted
+                                    }
+                                }
+                            },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text("Retry Grant")
+                        }
                     }
                 }
             }

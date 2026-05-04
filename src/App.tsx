@@ -212,6 +212,18 @@ export default function App() {
           ))}
         </div>
 
+        {/* Android Setup Guidance */}
+        <div className="mx-4 mt-2 mb-4 p-4 bg-yellow-500/5 border border-yellow-500/10 rounded-[20px]">
+          <h5 className="text-[10px] font-black text-yellow-500 uppercase tracking-widest flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 animate-pulse" />
+            Android Setup Notice
+          </h5>
+          <p className="text-[9px] text-gray-500 mt-2 leading-relaxed">
+            If blocked during install: Tap <span className="text-gray-300 font-bold">More details → Install anyway</span>. <br/>
+            If permissions are denied: Go to <span className="text-gray-300 font-bold">App Info → (⋮) → Allow restricted settings</span>.
+          </p>
+        </div>
+
         {/* Message List */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar mt-4">
           {authError && (
