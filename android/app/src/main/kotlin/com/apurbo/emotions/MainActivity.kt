@@ -68,11 +68,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SmsApp(viewModel: SmsViewModel = viewModel()) {
+fun SmsApp(smsViewModel: SmsViewModel = viewModel()) {
     var selectedTab by remember { mutableStateOf(0) }
     val tabs = listOf("bKash", "Nagad", "Others")
     
-    val messages by viewModel.messages.collectAsState()
+    val messages by smsViewModel.messages.collectAsState()
     
     Column {
         TabRow(selectedTabIndex = selectedTab) {

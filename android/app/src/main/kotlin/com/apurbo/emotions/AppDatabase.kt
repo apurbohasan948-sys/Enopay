@@ -14,7 +14,7 @@ interface SmsDao {
     suspend fun delete(sms: SmsMessage)
 }
 
-@Database(entities = [SmsMessage::class], version = 1)
+@Database(entities = [SmsMessage::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun smsDao(): SmsDao
 
