@@ -131,43 +131,47 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center py-8" style={{ backgroundColor: '#0f1115', color: '#e5e7eb' }}>
-      {/* App Container Like Structure */}
-      <div className="w-full max-w-md bg-dark-surface rounded-[32px] border-8 border-dark-border shadow-2xl flex flex-col overflow-hidden min-h-[800px]">
-        {/* Header */}
-        <header className="p-6 pb-4 flex items-center justify-between">
-          <div>
-            <h1 className="font-bold text-xl text-white tracking-tight">TX Organiser</h1>
-            <div className="flex items-center gap-1.5 mt-1">
-              <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-[11px] text-emerald-500 font-medium uppercase tracking-wider">Cloud Synced</span>
-            </div>
+    <div className="fixed inset-0 flex flex-col bg-dark-bg text-gray-200 font-sans overflow-hidden">
+      {/* Header */}
+      <header className="p-5 pb-4 flex items-center justify-between border-b border-dark-border bg-dark-surface/50 backdrop-blur-md z-10">
+        <div>
+          <h1 className="font-bold text-xl text-white tracking-tight">TX Organiser</h1>
+          <div className="flex items-center gap-1.5 mt-1">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+            <span className="text-[10px] text-emerald-500 font-bold uppercase tracking-wider">Live Sync</span>
           </div>
-          <div className="text-[10px] font-mono text-gray-500 bg-dark-card border border-dark-border px-2 py-1 rounded-lg">
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <div className="text-[9px] font-mono text-gray-500 bg-dark-card border border-dark-border px-2 py-0.5 rounded-md">
             {user?.uid?.slice(0, 8) || 'Init...'}
           </div>
-        </header>
+          {authError && <span className="text-[9px] text-red-500 font-bold uppercase">Config Error</span>}
+        </div>
+      </header>
+
+      {/* Main Content Area */}
+      <main className="flex-1 flex flex-col min-h-0 bg-dark-bg">
         {/* Search Bar */}
-        <div className="px-6 pb-4">
+        <div className="p-4">
           <div className="relative group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 group-focus-within:text-accent transition-colors" />
             <input 
               type="text"
-              placeholder="Search sender, body, or TrxID..."
+              placeholder="Search bKash, Nagad, or TrxID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-dark-card border border-dark-border rounded-xl py-2.5 pl-10 pr-4 text-xs font-medium text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-accent/50 transition-all shadow-sm"
+              className="w-full bg-dark-card border border-dark-border rounded-xl py-3 pl-10 pr-4 text-sm font-medium text-gray-200 placeholder:text-gray-600 focus:outline-none focus:border-accent/40 transition-all shadow-inner"
             />
           </div>
         </div>
 
-        {/* Filters / Tabs */}
-        <div className="flex border-b border-dark-border px-2">
+        {/* Categories / Tabs */}
+        <div className="flex px-2 border-b border-dark-border/50">
           {(['bKash', 'Nagad', 'Others'] as Category[]).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`flex-1 py-4 text-sm font-semibold transition-all relative ${
+              className={`flex-1 py-4 text-sm font-bold transition-all relative ${
                 activeTab === tab 
                   ? 'text-accent' 
                   : 'text-gray-500 hover:text-gray-400'
@@ -177,87 +181,95 @@ export default function App() {
               {activeTab === tab && (
                 <motion.div 
                   layoutId="activeTab"
-                  className="absolute bottom-0 left-1/4 right-1/4 h-0.5 bg-accent rounded-t-full"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent"
                 />
               )}
             </button>
           ))}
         </div>
 
-        {/* Auth Error Overlay */}
-        {authError && (
-          <div className="mx-4 mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
-            <h4 className="text-red-500 font-bold text-xs uppercase tracking-wider mb-1">Setup Required</h4>
-            <p className="text-[11px] text-red-400 leading-relaxed font-medium">
-              {authError}
-            </p>
-          </div>
-        )}
-
         {/* Message List */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          {authError && (
+            <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-2xl mb-4">
+              <h4 className="text-red-500 font-bold text-xs uppercase tracking-wider mb-1">Connection Issue</h4>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                {authError}. <br/>
+                <span className="text-gray-600 mt-2 block italic text-[10px]">Please verify your Firestore and Authentication settings.</span>
+              </p>
+            </div>
+          )}
+
           {loading ? (
-            <div className="flex-1 flex flex-col items-center justify-center gap-4 py-32">
-              <div className="w-6 h-6 border-2 border-accent/20 border-t-accent rounded-full animate-spin" />
-              <p className="text-[11px] text-gray-500 font-bold uppercase tracking-widest">Fetching Updates</p>
+            <div className="flex-1 flex flex-col items-center justify-center py-20 animate-in fade-in duration-500">
+              <div className="w-8 h-8 border-3 border-accent/10 border-t-accent rounded-full animate-spin mb-4" />
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[0.2em] animate-pulse">Syncing Database</p>
             </div>
           ) : filteredMessages.length === 0 ? (
-            <div className="py-32 text-center">
-              <div className="bg-dark-card w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-dark-border">
-                <Search className="w-8 h-8 text-dark-border" />
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="py-20 text-center"
+            >
+              <div className="bg-dark-surface w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6 border border-dark-border">
+                <MessageSquare className="w-8 h-8 text-dark-border" />
               </div>
-              <h3 className="text-white font-bold mb-1">
-                {searchQuery ? 'No Matches' : 'Queue Empty'}
-              </h3>
+              <h3 className="text-white font-bold mb-2">No Transactions</h3>
               <p className="text-gray-500 text-xs max-w-[200px] mx-auto leading-relaxed">
                 {searchQuery 
-                  ? `No transactions in ${activeTab} match "${searchQuery}"`
-                  : `Send a test ${activeTab} SMS to your linked device to populate.`}
+                  ? `None of your ${activeTab} messages match "${searchQuery}"`
+                  : `Waiting for ${activeTab} transaction SMS notifications.`}
               </p>
               {searchQuery && (
                 <button 
                   onClick={() => setSearchQuery('')}
-                  className="mt-4 text-[10px] font-bold text-accent uppercase tracking-widest hover:underline"
+                  className="mt-6 px-6 py-2 bg-dark-card border border-dark-border rounded-full text-[10px] font-bold text-accent uppercase tracking-widest hover:bg-dark-surface transition-colors"
                 >
-                  Clear Search
+                  Clear Filters
                 </button>
               )}
-            </div>
+            </motion.div>
           ) : (
-            <AnimatePresence mode="popLayout">
+            <AnimatePresence mode="popLayout" initial={false}>
               {filteredMessages.map((msg) => (
                 <motion.div
                   key={msg.id}
                   layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  className="bg-dark-card p-4 rounded-xl border border-dark-border group"
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-dark-card p-5 rounded-2xl border border-dark-border shadow-sm active:scale-[0.98] transition-transform"
                 >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white ${
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-black text-white shadow-lg ${
                         msg.category === 'bKash' ? 'bg-bkash' : 
                         msg.category === 'Nagad' ? 'bg-nagad' : 
-                        'bg-gray-600'
+                        'bg-gray-700'
                       }`}>
                         {msg.category.charAt(0)}
                       </div>
                       <div>
-                        <h4 className="font-bold text-sm text-white leading-none mb-1">{msg.sender}</h4>
-                        <span className="text-[10px] font-medium text-gray-500">
-                          {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
+                        <h4 className="font-bold text-white text-base leading-tight">{msg.sender}</h4>
+                        <div className="flex items-center gap-2 mt-0.5">
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+                            {new Date(msg.timestamp).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                          </span>
+                          <span className="w-1 h-1 bg-gray-700 rounded-full" />
+                          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">
+                            {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <p className="text-[13px] text-gray-400 line-clamp-2 leading-relaxed mb-4">
+                  <p className="text-[14px] text-gray-400 leading-relaxed mb-4">
                     {msg.body}
                   </p>
                   {msg.trxId && (
-                    <div className="bg-accent/5 border border-dashed border-accent/40 rounded-lg p-2.5 flex justify-between items-center">
-                      <span className="text-[9px] font-black text-accent uppercase tracking-[0.1em]">TrxID</span>
-                      <span className="text-xs font-mono text-gray-200 font-bold">{msg.trxId}</span>
+                    <div className="bg-dark-surface border border-dark-border rounded-xl p-3 flex justify-between items-center group/trx">
+                      <span className="text-[9px] font-black text-accent uppercase tracking-widest opacity-80">Ref ID</span>
+                      <span className="text-xs font-mono text-gray-300 font-bold group-hover/trx:text-white transition-colors">{msg.trxId}</span>
                     </div>
                   )}
                 </motion.div>
@@ -265,25 +277,23 @@ export default function App() {
             </AnimatePresence>
           )}
         </div>
+      </main>
 
-        {/* Info/CTA Section */}
-        <div className="p-4 bg-dark-card/50 border-t border-dark-border">
-          <div className="flex items-center gap-3 bg-dark-bg p-3 rounded-xl border border-dark-border">
-            <div className="bg-accent p-1.5 rounded-lg">
-              <Smartphone className="w-4 h-4 text-white" />
-            </div>
-            <div className="flex-1">
-              <h5 className="text-[11px] font-bold text-white uppercase tracking-wider">Device Sync Enabled</h5>
-              <p className="text-[10px] text-gray-500">Listening for transaction threads...</p>
-            </div>
+      {/* Persistent Footer Sync Info */}
+      <footer className="p-4 bg-dark-surface/80 backdrop-blur-lg border-t border-dark-border flex items-center gap-4">
+        <div className="flex-1 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+            <Smartphone className="w-4 h-4 text-emerald-500" />
+          </div>
+          <div className="flex-col">
+            <h5 className="text-[10px] font-bold text-white uppercase tracking-wider">Device Endpoint</h5>
+            <p className="text-[9px] text-gray-500 font-medium">Monitoring SMS threads...</p>
           </div>
         </div>
-      </div>
-
-      <p className="mt-8 text-[10px] text-gray-600 font-bold uppercase tracking-[0.2em] max-w-xs text-center leading-loose">
-        Android Source: /android/app <br/>
-        Firebase ID: taka-income-korbo
-      </p>
+        <div className="px-3 py-1.5 bg-accent/10 border border-accent/20 rounded-lg">
+          <p className="text-[9px] font-black text-accent uppercase tracking-widest">Active</p>
+        </div>
+      </footer>
     </div>
   );
 }
