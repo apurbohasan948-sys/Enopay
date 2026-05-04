@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "SmsMessage": {
+      "title": "SMS Message",
+      "description": "An extracted SMS message from a transaction provider.",
+      "type": "object",
+      "properties": {
+        "sender": { "type": "string", "description": "The phone number or name of the sender." },
+        "body": { "type": "string", "description": "The full body of the SMS." },
+        "category": { "type": "string", "enum": ["bKash", "Nagad", "Others"], "description": "The categorized provider." },
+        "trxId": { "type": "string", "description": "The extracted Transaction ID." },
+        "timestamp": { "type": "integer", "format": "int64", "description": "The time the message was received (server time preferred)." }
+      },
+      "required": ["sender", "body", "category", "timestamp"]
+    }
+  },
+  "firestore": {
+    "users/{userId}/messages/{messageId}": {
+      "schema": "SmsMessage",
+      "description": "User's collection of processed SMS messages."
+    }
+  }
+}

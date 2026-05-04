@@ -1,0 +1,6 @@
+{
+  "name": "SMS Transaction Organizer",
+  "description": "A cross-platform solution (Android + React) for tracking and organizing SMS financial transactions (bKash/Nagad) in real-time.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

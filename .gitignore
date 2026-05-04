@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Testing
+coverage/
+
+# Production
+dist/
+build/
+bin/
+
+# Misc
+.DS_Store
+*.log
+.env*
+!.env.example
+.vscode/
+.idea/
+
+# Android-specific
+.gradle/
+local.properties
+.cxx/
+*.apk
+*.ap_
+*.dex
+app/build/
+*.keystore
+!debug.keystore
+capture.png
+google-services.json
+
+# Vite
+.vite/

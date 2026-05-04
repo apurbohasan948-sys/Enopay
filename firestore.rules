@@ -1,0 +1,67 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helper Functions ---
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Schema Validation for SmsMessage
+    function isValidSmsMessage(data) {
+      return data.keys().hasAll(['sender', 'body', 'category', 'timestamp'])
+        && data.keys().size() >= 4 && data.keys().size() <= 5
+        && data.sender is string && data.sender.size() <= 64
+        && data.body is string && data.body.size() <= 1000
+        && data.category in ['bKash', 'Nagad', 'Others']
+        && (data.timestamp == request.time || data.timestamp is int) // Accept existing for updates
+        && (!data.keys().hasAny(['trxId']) || (data.trxId is string && data.trxId.size() <= 128));
+    }
+
+    // --- Collection Rules ---
+
+    match /users/{userId} {
+      // User can only access their own subcollection
+      match /messages/{messageId} {
+        allow get, list: if isOwner(userId);
+        
+        allow create: if isOwner(userId)
+          && isValidId(messageId)
+          && isValidSmsMessage(incoming())
+          && incoming().timestamp == request.time;
+
+        allow update: if isOwner(userId)
+          && isValidSmsMessage(incoming())
+          // Immortality: sender and category shouldn't change
+          && incoming().sender == existing().sender
+          && incoming().category == existing().category
+          // Only allow body or trxId updates (e.g. if extraction happened later)
+          && (incoming().diff(existing()).affectedKeys().hasOnly(['body', 'trxId', 'timestamp']))
+          && incoming().timestamp == request.time;
+
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
