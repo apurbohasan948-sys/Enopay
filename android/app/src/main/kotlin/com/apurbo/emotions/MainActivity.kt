@@ -40,11 +40,11 @@ import androidx.compose.foundation.BorderStroke
 
 class MainActivity : ComponentActivity() {
 
-    private fun isDefaultSmsApp(): Boolean {
+    fun isDefaultSmsApp(): Boolean {
         return Telephony.Sms.getDefaultSmsPackage(this) == packageName
     }
 
-    private fun requestDefaultSmsApp() {
+    fun requestDefaultSmsApp() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val roleManager = getSystemService(RoleManager::class.java)
             if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
@@ -169,7 +169,7 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
         mutableStateOf((context as? MainActivity)?.isDefaultSmsApp() ?: false)
     }
 
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
             if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
