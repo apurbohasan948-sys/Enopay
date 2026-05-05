@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel as composeViewModel
 import com.apurbo.emotions.ui.theme.SmsOrganizerTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Refresh
 import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import android.content.pm.PackageManager
@@ -26,6 +27,9 @@ import kotlinx.coroutines.launch
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import android.provider.Telephony
+import android.app.role.RoleManager
+import android.os.Build
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -35,6 +39,26 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.BorderStroke
 
 class MainActivity : ComponentActivity() {
+
+    private fun isDefaultSmsApp(): Boolean {
+        return Telephony.Sms.getDefaultSmsPackage(this) == packageName
+    }
+
+    private fun requestDefaultSmsApp() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val roleManager = getSystemService(RoleManager::class.java)
+            if (roleManager != null && roleManager.isRoleAvailable(RoleManager.ROLE_SMS)) {
+                if (!roleManager.isRoleHeld(RoleManager.ROLE_SMS)) {
+                    val intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_SMS)
+                    startActivityForResult(intent, 1001)
+                }
+            }
+        } else {
+            val intent = Intent(Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT)
+            intent.putExtra(Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, packageName)
+            startActivity(intent)
+        }
+    }
 
     private var onPermissionResult: ((Boolean) -> Unit)? = null
 
@@ -141,6 +165,27 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
         )
     }
 
+    var isDefaultSms by remember {
+        mutableStateOf((context as? MainActivity)?.isDefaultSmsApp() ?: false)
+    }
+
+    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                hasSmsPermissions = androidx.core.content.ContextCompat.checkSelfPermission(
+                    context, android.Manifest.permission.RECEIVE_SMS
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                
+                isDefaultSms = (context as? MainActivity)?.isDefaultSmsApp() ?: false
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
     Column(modifier = Modifier.background(Color(0xFF000000))) {
         // App Bar
         Surface(
@@ -148,13 +193,26 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
             modifier = Modifier.fillMaxWidth().height(60.dp),
             shadowElevation = 4.dp
         ) {
-            Box(contentAlignment = androidx.compose.ui.Alignment.CenterStart, modifier = Modifier.padding(horizontal = 16.dp)) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxSize(),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
                 Text(
                     "VAULT TRACKER", 
                     color = Color.White, 
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = androidx.compose.ui.unit.TextUnit.Unspecified
+                    fontWeight = FontWeight.Black
                 )
+                
+                IconButton(
+                    onClick = { smsViewModel.refreshManual() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Refresh,
+                        contentDescription = "Refresh",
+                        tint = Color(0xFFF472B6)
+                    )
+                }
             }
         }
 
@@ -181,6 +239,40 @@ fun SmsApp(smsViewModel: SmsViewModel = composeViewModel()) {
         
         val filteredMessages = messages.filter { 
             it.category.equals(tabs[selectedTab], ignoreCase = true) 
+        }
+
+        if (!isDefaultSms && hasSmsPermissions) {
+            Card(
+                modifier = Modifier.padding(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFF111111)),
+                shape = RoundedCornerShape(24.dp),
+                border = BorderStroke(1.dp, Color.Cyan.copy(alpha = 0.2f))
+            ) {
+                Column(modifier = Modifier.padding(20.dp)) {
+                    Text(
+                        "Set as Default SMS?", 
+                        style = MaterialTheme.typography.titleMedium, 
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "ডিফল্ট এসএমএস অ্যাপ হিসেবে সেট করলে অ্যাপটি আরও নির্ভুলভাবে কাজ করবে এবং সাথে সাথে মেসেজ রিড করতে পারবে।", 
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.Cyan
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Button(
+                        onClick = { 
+                            (context as? MainActivity)?.requestDefaultSmsApp()
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.Cyan.copy(alpha = 0.8f))
+                    ) {
+                        Text("Set as Default", color = Color.Black, fontWeight = FontWeight.Bold)
+                    }
+                }
+            }
         }
 
         if (!hasSmsPermissions) {

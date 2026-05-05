@@ -29,6 +29,15 @@ class SmsViewModel(application: Application) : AndroidViewModel(application) {
         checkAndScanLocal()
     }
 
+    fun refreshManual() {
+        val application = getApplication<Application>()
+        viewModelScope.launch(Dispatchers.IO) {
+            SmsRepository(application).scanExistingSms()
+            SmsRepository(application).syncPendingMessages()
+        }
+        fetchRemoteMessages()
+    }
+
     private fun checkAndScanLocal() {
         val application = getApplication<Application>()
         if (androidx.core.content.ContextCompat.checkSelfPermission(

@@ -14,8 +14,9 @@ import java.util.regex.Pattern
 class SmsReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        Log.d("SmsReceiver", "Received intent: ${intent?.action}")
-        if (intent?.action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION && context != null) {
+        val action = intent?.action
+        Log.d("SmsReceiver", "Received intent: $action")
+        if ((action == Telephony.Sms.Intents.SMS_RECEIVED_ACTION || action == Telephony.Sms.Intents.SMS_DELIVER_ACTION) && context != null) {
             val messages = Telephony.Sms.Intents.getMessagesFromIntent(intent)
             Log.d("SmsReceiver", "Extracted ${messages.size} messages")
             val pendingResult = goAsync()
