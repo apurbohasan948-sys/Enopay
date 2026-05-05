@@ -61,9 +61,11 @@ class MainActivity : ComponentActivity() {
         val allGranted = permissions.entries.all { it.value }
         onPermissionResult?.invoke(allGranted)
         if (allGranted) {
-            // Permissions granted, sync messages
+            // Permissions granted, sync and scan
             lifecycleScope.launch(Dispatchers.IO) {
-                SmsRepository(this@MainActivity).syncPendingMessages()
+                val repo = SmsRepository(this@MainActivity)
+                repo.scanExistingSms()
+                repo.syncPendingMessages()
             }
         }
     }

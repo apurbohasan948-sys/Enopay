@@ -4,8 +4,11 @@ import androidx.room.*
 
 @Dao
 interface SmsDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(sms: SmsMessage)
+
+    @Query("SELECT * FROM pending_messages ORDER BY timestamp DESC")
+    fun getAll(): kotlinx.coroutines.flow.Flow<List<SmsMessage>>
 
     @Query("SELECT * FROM pending_messages")
     suspend fun getAllPending(): List<SmsMessage>

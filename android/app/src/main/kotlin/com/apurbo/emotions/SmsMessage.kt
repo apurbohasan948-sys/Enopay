@@ -4,7 +4,10 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.firebase.firestore.Exclude
 
-@Entity(tableName = "pending_messages")
+@Entity(
+    tableName = "pending_messages",
+    indices = [androidx.room.Index(value = ["sender", "body", "timestamp"], unique = true)]
+)
 data class SmsMessage(
     @get:Exclude @PrimaryKey(autoGenerate = true) val localId: Int = 0,
     val sender: String = "",
