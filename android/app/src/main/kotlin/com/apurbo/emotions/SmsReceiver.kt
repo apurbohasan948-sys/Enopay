@@ -27,6 +27,9 @@ class SmsReceiver : BroadcastReceiver() {
                     for (msg in messages) {
                         val body = msg.messageBody
                         val sender = msg.originatingAddress ?: "Unknown"
+                        withContext(Dispatchers.Main) {
+                            android.widget.Toast.makeText(context, "New message from $sender", android.widget.Toast.LENGTH_SHORT).show()
+                        }
                         processMessage(repository, body, sender)
                     }
                     repository.syncPendingMessages()

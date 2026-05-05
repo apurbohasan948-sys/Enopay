@@ -50,13 +50,11 @@ class SmsRepository(private val context: Context) {
                 val bodyIdx = it.getColumnIndex(android.provider.Telephony.Sms.Inbox.BODY)
                 val dateIdx = it.getColumnIndex(android.provider.Telephony.Sms.Inbox.DATE)
 
+                var count = 0
                 while (it.moveToNext()) {
                     val sender = it.getString(addressIdx)
                     val body = it.getString(bodyIdx)
                     val timestamp = it.getLong(dateIdx)
-                    
-                    // Simple logic to avoid exact duplicates for now
-                    // In a real app, we'd check if we already have this message
                     
                     val category = when {
                         body.contains("bKash", ignoreCase = true) -> "bKash"
@@ -71,6 +69,10 @@ class SmsRepository(private val context: Context) {
                         timestamp = timestamp
                     )
                     saveLocally(sms)
+                    count++
+                }
+                android.os.Handler(android.os.Looper.getMainLooper()).post {
+                    android.widget.Toast.makeText(context, "Synced $count historical messages", android.widget.Toast.LENGTH_LONG).show()
                 }
             }
         } catch (e: Exception) {

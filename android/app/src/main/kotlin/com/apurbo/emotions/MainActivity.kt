@@ -62,11 +62,14 @@ class MainActivity : ComponentActivity() {
         onPermissionResult?.invoke(allGranted)
         if (allGranted) {
             // Permissions granted, sync and scan
+            android.widget.Toast.makeText(this@MainActivity, "Scanning for messages...", android.widget.Toast.LENGTH_SHORT).show()
             lifecycleScope.launch(Dispatchers.IO) {
                 val repo = SmsRepository(this@MainActivity)
                 repo.scanExistingSms()
                 repo.syncPendingMessages()
             }
+        } else {
+            android.widget.Toast.makeText(this@MainActivity, "Permission denied. App won't work correctly.", android.widget.Toast.LENGTH_LONG).show()
         }
     }
 

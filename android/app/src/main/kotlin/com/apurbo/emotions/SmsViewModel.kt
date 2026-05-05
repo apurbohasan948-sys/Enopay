@@ -8,6 +8,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
 
 class SmsViewModel(application: Application) : AndroidViewModel(application) {
     private val localDb = AppDatabase.getDatabase(application)
